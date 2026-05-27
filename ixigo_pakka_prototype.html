@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ixigo Pakka — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --orange:#FF4D00; --orange-d:#D43F00; --orange-soft:#FFF1E8;
+  --ink:#1A130D; --muted:#7C6E60; --line:#ECE0D2; --bg:#FFF7EE;
+  --green:#0FA15B; --green-bg:#E7F7EE; --red:#E5484D; --red-bg:#FCEBEB;
+  --card:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Poppins',system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(1200px 600px at 70% -10%,#FFE6D6,transparent 60%),#F3ECE3;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 12px 40px}
+.head{text-align:center;max-width:520px}
+.head h1{font-size:21px;letter-spacing:-.02em}
+.head h1 b{color:var(--orange)}
+.head p{font-size:12.5px;color:#6a5d50;margin-top:4px;line-height:1.5}
+.head .pill{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--orange-d);background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:4px 11px;margin-bottom:10px}
+
+/* phone */
+.phone{width:392px;max-width:96vw;height:812px;background:var(--bg);border-radius:44px;
+  box-shadow:0 30px 70px -20px rgba(60,30,0,.45),0 0 0 11px #15110d,0 0 0 13px #2a2018;
+  position:relative;overflow:hidden;display:flex;flex-direction:column}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;
+  background:#15110d;border-radius:0 0 18px 18px;z-index:60}
+.status{height:46px;flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 24px 6px;font-size:12px;font-weight:600;z-index:50}
+.status .r{display:flex;gap:6px;align-items:center}
+
+/* top app bar */
+.appbar{flex-shrink:0;background:var(--orange);color:#fff;padding:8px 16px 14px;display:flex;align-items:center;gap:12px;
+  position:relative;z-index:20}
+.appbar .logo{font-weight:800;font-size:19px;letter-spacing:-.02em}
+.appbar .logo span{font-weight:600;opacity:.92;font-size:14px}
+.appbar .back{font-size:22px;cursor:pointer;width:26px;line-height:1;margin-left:-4px}
+.appbar .title{font-weight:700;font-size:16px}
+.appbar .sub{font-size:11px;opacity:.9;font-weight:500}
+
+/* scroll area */
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.screen::-webkit-scrollbar{width:0}
+.pad{padding:16px}
+.view{display:none;animation:fade .35s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* search card */
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;
+  box-shadow:0 8px 22px -16px rgba(60,30,0,.3)}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.seg div{flex:1;text-align:center;padding:10px;font-size:12px;font-weight:600;color:var(--muted)}
+.seg div.on{background:var(--orange-soft);color:var(--orange-d)}
+.fromto{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+.ft{display:flex;align-items:center;gap:12px;padding:13px 15px}
+.ft+.ft{border-top:1px solid var(--line)}
+.ft .ico{width:30px;height:30px;border-radius:9px;background:var(--orange-soft);color:var(--orange);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ft .lab{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ft .val{font-size:16px;font-weight:700;line-height:1.2}
+.ft .code{font-size:11px;color:var(--muted);font-weight:500}
+.swap{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;
+  background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--orange);z-index:5}
+.row2{display:flex;gap:12px;margin-top:12px}
+.mini{flex:1;border:1.5px solid var(--line);border-radius:14px;padding:11px 14px}
+.btn{display:block;width:100%;border:none;background:var(--orange);color:#fff;font-family:inherit;
+  font-weight:700;font-size:15px;padding:15px;border-radius:15px;margin-top:16px;cursor:pointer;
+  box-shadow:0 10px 22px -10px rgba(255,77,0,.7);transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--orange-d);border:1.5px solid var(--orange)}
+.quote{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin:18px 4px 6px;text-align:center}
+
+/* results */
+.daystrip{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.day{flex-shrink:0;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:7px 13px;text-align:center;font-size:11px}
+.day.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.day b{display:block;font-size:14px}
+.train{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:11px}
+.train .t1{display:flex;justify-content:space-between;align-items:baseline}
+.train .nm{font-weight:700;font-size:13.5px}
+.train .no{font-size:10.5px;color:var(--muted);font-family:'Space Mono'}
+.train .tt{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
+.tt .tm{font-weight:700;font-size:16px}
+.tt .tm small{font-size:10px;color:var(--muted);font-weight:500;display:block}
+.tt .dur{font-size:10.5px;color:var(--muted);text-align:center}
+.tt .dur::before{content:"";display:block;height:1px;background:var(--line);margin:5px 0}
+.cls{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.wl{font-size:11px;font-weight:700;border-radius:9px;padding:5px 9px;background:var(--red-bg);color:var(--red);font-family:'Space Mono'}
+.wl.rac{background:#FFF4E5;color:#C9760B}
+
+/* sticky pakka banner */
+.pakkabar{position:sticky;bottom:0;margin:6px -16px -16px;padding:14px 16px 18px;
+  background:linear-gradient(0deg,var(--bg) 60%,rgba(255,247,238,0));}
+.pakkacta{background:var(--ink);color:#fff;border-radius:17px;padding:14px 15px;display:flex;align-items:center;gap:12px;
+  cursor:pointer;box-shadow:0 16px 30px -14px rgba(0,0,0,.5);transition:transform .12s}
+.pakkacta:active{transform:scale(.98)}
+.pakkacta .sp{width:30px;height:30px;color:var(--orange);flex-shrink:0}
+.pakkacta .pt{font-weight:700;font-size:13.5px;line-height:1.25}
+.pakkacta .ps{font-size:11px;color:#cdbfae;margin-top:2px}
+.pakkacta .go{margin-left:auto;font-size:20px;color:var(--orange)}
+
+/* pakka chat */
+.chatwrap{padding:16px 14px 12px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+.bubble{max-width:86%;padding:11px 14px;border-radius:16px;font-size:12.5px;line-height:1.5}
+.b-user{align-self:flex-end;background:var(--orange);color:#fff;border-bottom-right-radius:5px}
+.b-ai{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px;
+  box-shadow:0 6px 16px -14px rgba(0,0,0,.4)}
+.b-ai .who{display:flex;align-items:center;gap:6px;font-weight:700;font-size:11px;color:var(--orange-d);margin-bottom:5px}
+.b-ai .who svg{width:14px;height:14px}
+.typing{display:inline-flex;gap:4px;padding:3px 0}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--orange);opacity:.4;animation:bnc 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bnc{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.cursor{display:inline-block;width:7px;height:14px;background:var(--orange);margin-left:1px;vertical-align:-2px;animation:bl .7s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+
+/* option card */
+.opt{background:#fff;border:1.5px solid var(--line);border-radius:17px;padding:13px;cursor:pointer;
+  transition:border-color .15s,transform .12s;align-self:stretch}
+.opt:active{transform:scale(.99)}
+.opt.best{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+.opt .otop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.tagbadge{font-size:9.5px;font-weight:700;font-family:'Space Mono';text-transform:uppercase;letter-spacing:.06em;
+  padding:3px 8px;border-radius:7px;background:var(--orange-soft);color:var(--orange-d)}
+.tagbadge.fast{background:#EAF1FF;color:#2456C7}
+.tagbadge.cheap{background:var(--green-bg);color:#0c7a45}
+.opt .price{font-weight:800;font-size:17px}
+.opt .price small{font-size:10px;color:var(--muted);font-weight:600}
+.legs{display:flex;align-items:center;gap:4px;margin:4px 0 10px}
+.lg{display:flex;flex-direction:column;align-items:center;text-align:center;flex:1;min-width:0}
+.lg .li{width:30px;height:30px;border-radius:9px;background:#FBF3E8;border:1px solid var(--line);
+  color:var(--orange);display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.lg .li svg{width:17px;height:17px}
+.lg .ll{font-size:9px;font-weight:700;line-height:1.1}
+.lg .ls{font-size:8px;color:var(--muted);line-height:1.1;margin-top:1px}
+.lgar{color:var(--orange);font-size:13px;flex-shrink:0;padding-bottom:14px}
+.metrics{display:flex;gap:14px;font-size:10.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:9px}
+.metrics b{color:var(--ink);font-weight:700}
+.allcnf{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-weight:700;font-size:10.5px}
+.allcnf svg{width:13px;height:13px}
+.ainote{font-size:11px;line-height:1.45;color:#5d4f42;background:var(--orange-soft);border-radius:10px;
+  padding:8px 10px;margin-top:9px}
+.ainote b{color:var(--orange-d)}
+
+/* quick replies */
+.qr{display:flex;gap:8px;flex-wrap:wrap;align-self:flex-start;margin-top:2px}
+.qrchip{border:1.5px solid var(--orange);color:var(--orange-d);background:#fff;border-radius:20px;
+  padding:8px 13px;font-size:11.5px;font-weight:600;font-family:inherit;cursor:pointer;transition:.12s}
+.qrchip:active{background:var(--orange-soft)}
+
+/* input bar */
+.inbar{flex-shrink:0;border-top:1px solid var(--line);background:#fff;padding:10px 12px;display:flex;gap:9px;align-items:center}
+.inbar input{flex:1;border:1.5px solid var(--line);border-radius:22px;padding:11px 15px;font-family:inherit;font-size:12.5px;outline:none}
+.inbar input:focus{border-color:var(--orange)}
+.inbar .send{width:42px;height:42px;border-radius:50%;background:var(--orange);color:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+
+/* itinerary */
+.itin{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;position:relative}
+.tline{position:relative;padding-left:34px}
+.step{position:relative;padding-bottom:18px}
+.step:last-child{padding-bottom:0}
+.step::before{content:"";position:absolute;left:-22px;top:4px;width:14px;height:14px;border-radius:50%;
+  background:#fff;border:3px solid var(--orange)}
+.step:not(:last-child)::after{content:"";position:absolute;left:-16px;top:18px;bottom:-4px;width:2px;background:var(--line)}
+.step.mode::before{border-color:var(--green);background:var(--green)}
+.step .sh{display:flex;align-items:center;gap:8px}
+.step .si{width:26px;height:26px;border-radius:8px;background:#FBF3E8;color:var(--orange);display:flex;align-items:center;justify-content:center}
+.step .si svg{width:15px;height:15px}
+.step .stt{font-weight:700;font-size:13px}
+.step .sd{font-size:10.5px;color:var(--muted);margin-top:2px}
+.step .pnr{font-family:'Space Mono';font-size:10px;color:var(--green);font-weight:700;margin-top:3px}
+.layover{font-size:10px;color:#C9760B;background:#FFF4E5;border-radius:8px;padding:5px 9px;margin:7px 0 0;display:inline-block}
+.risknote{display:flex;gap:9px;background:var(--green-bg);border-radius:12px;padding:11px 12px;margin-top:14px;font-size:11px;line-height:1.45;color:#0c5a36}
+.risknote svg{width:18px;height:18px;color:var(--green);flex-shrink:0;margin-top:1px}
+.totbar{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.totbar .tl{font-size:11px;color:var(--muted)}
+.totbar .tv{font-weight:800;font-size:22px}
+
+/* confirm */
+.confwrap{text-align:center;padding:40px 26px}
+.tick{width:92px;height:92px;border-radius:50%;background:var(--green-bg);color:var(--green);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+.tick svg{width:48px;height:48px}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.confwrap h2{font-size:21px;letter-spacing:-.01em}
+.confwrap p{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+.tripid{font-family:'Space Mono';font-size:12px;background:#fff;border:1px dashed var(--orange);
+  color:var(--orange-d);border-radius:10px;padding:9px;margin-top:18px;font-weight:700}
+.confcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:16px;text-align:left}
+.confcard .cl{display:flex;justify-content:space-between;font-size:11.5px;padding:5px 0}
+.confcard .cl b{font-weight:700}
+.confcard .cl .ok{color:var(--green);font-weight:700}
+
+.toast{position:absolute;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;padding:10px 16px;border-radius:24px;
+  opacity:0;pointer-events:none;transition:.3s;z-index:80;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{font-size:11px;color:#8a7d6f;text-align:center;max-width:430px;line-height:1.5}
+.foot code{font-family:'Space Mono';background:#fff;padding:1px 6px;border-radius:5px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="pill">ProdCom 4.0 · GenAI Prototype</div>
+  <h1><b>ixigo</b> Pakka — AI Journey Composer</h1>
+  <p>When the direct train is waitlisted, Pakka generates a <b>confirmed</b>, door-to-door multi-modal route.<br>Tap through the live flow below. ↓</p>
+</div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status"><span>9:41</span><span class="r">📶 &nbsp;🔋</span></div>
+  <div id="bar" class="appbar"></div>
+  <div class="screen" id="screen">
+
+    <!-- 1. SEARCH -->
+    <div class="view active" id="v-search">
+      <div class="pad">
+        <div class="card">
+          <div class="seg"><div class="on">Trains</div><div>Flights</div><div>Buses</div><div>Hotels</div></div>
+          <div class="fromto">
+            <div class="ft"><div class="ico" data-i="train"></div><div><div class="lab">From</div><div class="val">New Delhi <span class="code">· NDLS</span></div></div></div>
+            <div class="ft"><div class="ico" data-i="pin"></div><div><div class="lab">To</div><div class="val">Patna Jn <span class="code">· PNBE</span></div></div></div>
+            <div class="swap" data-i="swap"></div>
+          </div>
+          <div class="row2">
+            <div class="mini"><div class="lab" style="font-size:10px;color:var(--muted);text-transform:uppercase">Date</div><div style="font-weight:700;font-size:14px">Fri, 29 May</div></div>
+            <div class="mini"><div class="lab" style="font-size:10px;color:var(--muted);text-transform:uppercase">Class</div><div style="font-weight:700;font-size:14px">Sleeper · 1</div></div>
+          </div>
+          <button class="btn" onclick="go('results')">Search Trains</button>
+        </div>
+        <div class="quote">festival weekend · high demand route</div>
+      </div>
+    </div>
+
+    <!-- 2. RESULTS -->
+    <div class="view" id="v-results">
+      <div class="pad">
+        <div class="daystrip">
+          <div class="day on">Fri<b>29</b></div><div class="day">Sat<b>30</b></div>
+          <div class="day">Sun<b>31</b></div><div class="day">Mon<b>01</b></div>
+        </div>
+        <div id="trainlist"></div>
+        <div class="pakkabar">
+          <div class="pakkacta" onclick="startPakka()">
+            <div class="sp" data-i="spark"></div>
+            <div><div class="pt">No confirmed seats? Ask ixigo&nbsp;Pakka ✨</div><div class="ps">AI builds a confirmed route via trains, buses &amp; flights</div></div>
+            <div class="go">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PAKKA CHAT -->
+    <div class="view" id="v-pakka" style="height:100%">
+      <div class="chatwrap" id="chat"></div>
+    </div>
+
+    <!-- 4. ITINERARY -->
+    <div class="view" id="v-itin">
+      <div class="pad" id="itinbody"></div>
+    </div>
+
+    <!-- 5. CONFIRM -->
+    <div class="view" id="v-confirm">
+      <div class="confwrap">
+        <div class="tick" data-i="check"></div>
+        <h2>Trip booked — all पक्का!</h2>
+        <p>Every leg is <b>confirmed</b>. We've added your full door-to-door plan to <b>My Trips</b> with live tracking &amp; reminders for each connection.</p>
+        <div class="tripid">TRIP ID · IXG-PKA-2K9X4</div>
+        <div class="confcard" id="confcard"></div>
+        <button class="btn" onclick="reset()">Plan another trip</button>
+        <button class="btn ghost" onclick="go('itin')" style="margin-top:10px">View itinerary</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="inbar" id="inbar" style="display:none">
+    <input id="chatinput" placeholder="Ask Pakka to tweak the plan…" onkeydown="if(event.key==='Enter')sendInput()">
+    <button class="send" data-i="send" onclick="sendInput()"></button>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<div class="foot">
+  Self-contained prototype — deploy to Lovable / Vercel / GitHub Pages, or submit this file.<br>
+  Suggested name: <code>&lt;yourname&gt;_&lt;roll&gt;_prodcom4.html</code>
+</div>
+
+<script>
+// ---------- icons ----------
+const ICON = {
+ train:'<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="13" rx="3" stroke="currentColor" stroke-width="2"/><path d="M5 10h14" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="13" r="1.1" fill="currentColor"/><circle cx="15.5" cy="13" r="1.1" fill="currentColor"/><path d="M7 19l-1.5 2M17 19l1.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+ bus:'<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="13" rx="3" stroke="currentColor" stroke-width="2"/><path d="M4 11h16" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="13.7" r="1" fill="currentColor"/><circle cx="16" cy="13.7" r="1" fill="currentColor"/><path d="M7 17v2.5M17 17v2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+ plane:'<svg viewBox="0 0 24 24" fill="none"><path d="M21 16.5L13.5 13V6.5a1.5 1.5 0 00-3 0V13L3 16.5V18l7.5-2v3.5L8 21v1.2l4-1 4 1V21l-2.5-1.5V16l7.5 2v-1.5z" fill="currentColor"/></svg>',
+ taxi:'<svg viewBox="0 0 24 24" fill="none"><path d="M3 14l1.8-4.5A3 3 0 017.6 7.6h8.8a3 3 0 012.8 1.9L21 14v4a1 1 0 01-1 1h-1.5a1 1 0 01-1-1v-1H6.5v1a1 1 0 01-1 1H4a1 1 0 01-1-1v-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="14.5" r="1.1" fill="currentColor"/><circle cx="17" cy="14.5" r="1.1" fill="currentColor"/></svg>',
+ pin:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="2"/></svg>',
+ swap:'<svg viewBox="0 0 24 24" fill="none"><path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ spark:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 2c.6 4.7 2.7 6.8 7.4 7.4-4.7.6-6.8 2.7-7.4 7.4-.6-4.7-2.7-6.8-7.4-7.4C9.3 8.8 11.4 6.7 12 2z" fill="currentColor"/><path d="M19 14c.3 2 1.1 2.8 3 3-1.9.3-2.7 1.1-3 3-.3-1.9-1.1-2.7-3-3 1.9-.2 2.7-1 3-3z" fill="currentColor"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-12" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ send:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l16-8-6 16-3.5-6L4 12z" fill="currentColor"/></svg>',
+ shield:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+document.querySelectorAll('[data-i]').forEach(e=>e.innerHTML=ICON[e.dataset.i]||'');
+
+// ---------- app bars ----------
+const BARS={
+ search:`<div class="logo">ixigo <span>Trains</span></div>`,
+ results:`<div class="back" onclick="go('search')">‹</div><div><div class="title">New Delhi → Patna</div><div class="sub">Fri 29 May · Sleeper · 1 traveller</div></div>`,
+ pakka:`<div class="back" onclick="go('results')">‹</div><div style="display:flex;align-items:center;gap:7px"><span style="width:20px;height:20px;color:#fff" id="barspark"></span><div><div class="title">ixigo Pakka</div><div class="sub">AI Journey Composer</div></div></div>`,
+ itin:`<div class="back" onclick="go('pakka')">‹</div><div><div class="title">Your पक्का route</div><div class="sub">Door-to-door · all confirmed</div></div>`,
+ confirm:`<div class="logo">ixigo <span>Trains</span></div>`
+};
+function setBar(v){document.getElementById('bar').innerHTML=BARS[v];const s=document.getElementById('barspark');if(s)s.innerHTML=ICON.spark;}
+
+// ---------- direct trains (all waitlisted = the pain) ----------
+const TRAINS=[
+ {nm:'Sampoorna Kranti SF',no:'12393',dep:'17:35',arr:'07:40',dur:'14h 05m',from:'NDLS',to:'PNBE',cls:[['SL','WL 47'],['3A','WL 22'],['2A','WL 9']]},
+ {nm:'Magadh Express',no:'20801',dep:'20:20',arr:'12:10',dur:'15h 50m',from:'NDLS',to:'PNBE',cls:[['SL','WL 31'],['3A','RAC 14','rac'],['2A','WL 6']]},
+ {nm:'Rajdhani Express',no:'12309',dep:'17:15',arr:'06:55',dur:'13h 40m',from:'NDLS',to:'PNBE',cls:[['3A','WL 18'],['2A','RAC 5','rac'],['1A','WL 3']]},
+ {nm:'Vikramshila Express',no:'12367',dep:'22:30',arr:'15:25',dur:'16h 55m',from:'ANVT',to:'PNBE',cls:[['SL','WL 63'],['3A','WL 29'],['2A','WL 11']]}
+];
+function renderTrains(){
+ document.getElementById('trainlist').innerHTML=TRAINS.map(t=>`
+  <div class="train">
+    <div class="t1"><div class="nm">${t.nm}</div><div class="no">${t.no}</div></div>
+    <div class="tt">
+      <div class="tm">${t.dep}<small>${t.from}</small></div>
+      <div class="dur">${t.dur}</div>
+      <div class="tm" style="text-align:right">${t.arr}<small>${t.to}</small></div>
+    </div>
+    <div class="cls">${t.cls.map(c=>`<span class="wl ${c[2]||''}">${c[0]} · ${c[1]}</span>`).join('')}</div>
+  </div>`).join('');
+}
+
+// ---------- journey options (generated by Pakka) ----------
+const OPTIONS={
+ recommended:{
+   tag:'Recommended',cls:'',price:'1,840',dur:'14h 20m',swaps:'1 change',
+   legs:[['taxi','Cab','Home→NDLS'],['train','Train · CNF','NDLS→Kanpur'],['bus','AbhiBus · CNF','Kanpur→Patna'],['taxi','Cab','PNBE→Home']],
+   note:'<b>Best balance.</b> Confirmed AC chair to Kanpur, then a Volvo sleeper on AbhiBus straight to Patna. Comfortable 40-min buffer between legs — low miss-risk.',
+   steps:[
+     ['mode','taxi','Cab — Home to New Delhi Stn','15:00 · ~25 min · ₹180','book'],
+     ['','train','Shram Shakti Exp · CC','NDLS 16:00 → Kanpur (CNPR) 20:55 · 4h 55m','PNR 845-2210763 · CNF C4-32'],
+     ['lay','Layover at Kanpur · 40 min — board AbhiBus at bay 3',''],
+     ['mode','bus','AbhiBus · Volvo Sleeper','Kanpur 21:35 → Patna 06:50 · 9h 15m','Seat L7 · CONFIRMED'],
+     ['mode','taxi','Cab — Patna Stn to Home','07:00 · ~20 min · ₹150','book']
+   ]},
+ fastest:{
+   tag:'Fastest',cls:'fast',price:'4,180',dur:'6h 05m',swaps:'1 change',
+   legs:[['taxi','Cab','Home→DEL'],['plane','Flight','DEL→Lucknow'],['train','Train · CNF','LKO→Patna'],['taxi','Cab','PNBE→Home']],
+   note:'<b>Beats every waitlist.</b> IndiGo to Lucknow, then a confirmed Vande Bharat chair to Patna. Half the time — worth it for an emergency or a tight festival window.',
+   steps:[
+     ['mode','taxi','Cab — Home to Terminal 1','13:30 · ₹220','book'],
+     ['mode','plane','IndiGo 6E-2043','DEL 15:10 → Lucknow 16:25 · 1h 15m','PNR ZX8K2Q · CONFIRMED'],
+     ['lay','Layover at Lucknow · 55 min',''],
+     ['','train','Vande Bharat Exp · CC','LKO 17:20 → Patna 21:35 · 4h 15m','PNR 612-9981044 · CNF C2-18'],
+     ['mode','taxi','Cab — Patna Stn to Home','21:45 · ₹150','book']
+   ]},
+ cheapest:{
+   tag:'Cheapest',cls:'cheap',price:'1,210',dur:'16h 30m',swaps:'1 change',
+   legs:[['taxi','Cab','Home→NDLS'],['train','Train · CNF','NDLS→DDU'],['train','Train · CNF','DDU→Patna'],['taxi','Cab','PNBE→Home']],
+   note:'<b>Pure break-journey hack.</b> The NDLS→Patna sleeper is WL, but NDLS→Pt. Deen Dayal (DDU) and DDU→Patna are <b>both available in sleeper</b> — splitting the PNR confirms the whole trip for ₹1,210.',
+   steps:[
+     ['mode','taxi','Cab — Home to New Delhi Stn','18:30 · ₹180','book'],
+     ['','train','Poorva Express · SL','NDLS 19:25 → DDU (Mughalsarai) 09:10 · 13h 45m','PNR 220-7741890 · CNF S6-44'],
+     ['lay','Layover at DDU · 35 min',''],
+     ['','train','Patna Intercity · 2S','DDU 09:45 → Patna 12:30 · 2h 45m','PNR 220-7741921 · CNF D1-09'],
+     ['mode','taxi','Cab — Patna Stn to Home','12:40 · ₹150','book']
+   ]}
+};
+
+// ---------- chat engine ----------
+const chat=document.getElementById('chat');
+let chatBuilt=false;
+function go(v){
+ ['search','results','pakka','itin','confirm'].forEach(x=>document.getElementById('v-'+x).classList.remove('active'));
+ document.getElementById('v-'+v).classList.add('active');
+ setBar(v);
+ document.getElementById('inbar').style.display = (v==='pakka' && chatBuilt) ? 'flex' : 'none';
+ document.getElementById('screen').scrollTop=0;
+}
+function startPakka(){go('pakka');document.getElementById('inbar').style.display='none';chat.innerHTML='';chatBuilt=false;runIntro();}
+
+function userBubble(t){const d=document.createElement('div');d.className='bubble b-user';d.textContent=t;chat.appendChild(d);scroll();}
+function scroll(){const s=document.getElementById('screen');s.scrollTop=s.scrollHeight;}
+
+function aiTyping(){
+ const d=document.createElement('div');d.className='bubble b-ai';
+ d.innerHTML=`<div class="who">${ICON.spark} Pakka</div><div class="typing"><i></i><i></i><i></i></div>`;
+ chat.appendChild(d);scroll();return d;
+}
+function typeInto(el,html,done){
+ // strip then type plain text, then swap to html for bold
+ const tmp=document.createElement('div');tmp.innerHTML=html;const text=tmp.textContent;
+ el.innerHTML=`<div class="who">${ICON.spark} Pakka</div><span class="ln"></span><span class="cursor"></span>`;
+ const ln=el.querySelector('.ln');let i=0;
+ const iv=setInterval(()=>{
+   i+=2; ln.textContent=text.slice(0,i); scroll();
+   if(i>=text.length){clearInterval(iv); el.querySelector('.cursor').remove(); ln.innerHTML=html; done&&done();}
+ },14);
+}
+
+function runIntro(){
+ userBubble('Get me from Delhi to Patna this Friday — I need confirmed seats, budget around ₹2,500.');
+ const t=aiTyping();
+ setTimeout(()=>{
+   typeInto(t,`All 4 direct trains are deep waitlist 😕 — but I found <b>3 fully-confirmed ways</b> to get you there by mixing trains, AbhiBus &amp; flights. Here's what I'd pick:`,()=>{
+     renderOptions(['recommended','fastest','cheapest']); showQuick(); chatBuilt=true;
+     document.getElementById('inbar').style.display='flex';
+   });
+ },900);
+}
+
+function legHTML(legs){
+ let h='';legs.forEach((l,idx)=>{
+   h+=`<div class="lg"><div class="li">${ICON[l[0]]}</div><div class="ll">${l[1]}</div><div class="ls">${l[2]}</div></div>`;
+   if(idx<legs.length-1)h+=`<div class="lgar">→</div>`;
+ });return h;
+}
+function renderOptions(keys){
+ keys.forEach((k,idx)=>{
+   const o=OPTIONS[k];const card=document.createElement('div');
+   card.className='opt'+(idx===0?' best':'');card.onclick=()=>openItin(k);
+   card.innerHTML=`
+     <div class="otop"><span class="tagbadge ${o.cls}">${o.tag}</span>
+       <span class="price">₹${o.price}<small>/person</small></span></div>
+     <div class="legs">${legHTML(o.legs)}</div>
+     <div class="metrics"><span>🕑 <b>${o.dur}</b></span><span>🔁 <b>${o.swaps}</b></span>
+       <span class="allcnf" style="margin-left:auto">${ICON.check} All confirmed</span></div>
+     <div class="ainote">${o.note}</div>`;
+   chat.appendChild(card);
+ });
+ scroll();
+}
+function showQuick(){
+ const wrap=document.createElement('div');wrap.className='qr';
+ [['Make it cheaper','cheaper'],['I can’t leave before 6 PM','late'],['Avoid buses','nobus']]
+  .forEach(q=>{const b=document.createElement('button');b.className='qrchip';b.textContent=q[0];
+    b.onclick=()=>quick(q[1],q[0]);wrap.appendChild(b);});
+ chat.appendChild(wrap);scroll();
+}
+function clearQuick(){const q=chat.querySelector('.qr');if(q)q.remove();}
+
+function quick(kind,label){
+ clearQuick(); userBubble(label);
+ const t=aiTyping();
+ const resp={
+  cheaper:[`Cheapest confirmed option is the <b>break-journey via DDU at ₹1,210</b> — splitting the waitlisted ticket into two confirmed sleeper legs. Re-ordered it to the top 👇`,['cheapest','recommended']],
+  late:[`Got it — filtered to departures after 6 PM. The <b>break-journey via DDU (dep 19:25)</b> and the <b>flight via Lucknow (dep 15:10 dropped)</b>… keeping only evening starts:`,['cheapest','recommended']],
+  nobus:[`No problem — dropped AbhiBus. Both remaining routes are <b>train + train / flight only</b>, still fully confirmed:`,['cheapest','fastest']]
+ }[kind];
+ setTimeout(()=>typeInto(t,resp[0],()=>{renderOptions(resp[1]);showQuick();scroll();}),800);
+}
+
+function sendInput(){
+ const inp=document.getElementById('chatinput');const v=inp.value.trim();if(!v)return;inp.value='';
+ clearQuick(); userBubble(v);
+ const t=aiTyping();
+ setTimeout(()=>typeInto(t,`On it — re-composing routes around that. Here are the best confirmed options I can build right now:`,
+   ()=>{renderOptions(['recommended','cheapest','fastest']);showQuick();}),800);
+}
+
+// ---------- itinerary ----------
+let chosen='recommended';
+function openItin(k){chosen=k;buildItin(k);go('itin');}
+function buildItin(k){
+ const o=OPTIONS[k];
+ let steps='';
+ o.steps.forEach(s=>{
+   if(s[0]==='lay'){steps+=`<div class="step"><span class="layover">⏱ ${s[1]}</span></div>`;return;}
+   const cls=s[0]==='mode'?'mode':'';
+   const meta = s[4]==='book'
+      ? `<div class="pnr" style="color:var(--muted)">Auto-booked with trip</div>`
+      : (s[4]?`<div class="pnr">✓ ${s[4]}</div>`:'');
+   steps+=`<div class="step ${cls}"><div class="sh"><div class="si">${ICON[s[1]]}</div><div><div class="stt">${s[2]}</div><div class="sd">${s[3]}</div>${meta}</div></div></div>`;
+ });
+ document.getElementById('itinbody').innerHTML=`
+   <div class="itin">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+       <div><div style="font-weight:800;font-size:16px">New Delhi → Patna</div>
+         <div style="font-size:11px;color:var(--muted)">${o.tag} · ${o.dur} · ${o.swaps}</div></div>
+       <span class="allcnf" style="font-size:12px">${ICON.check} पक्का</span>
+     </div>
+     <div class="tline">${steps}</div>
+     <div class="risknote">${ICON.shield}<div><b>Pakka Assured:</b> if any leg is delayed and you risk missing the next, we auto-rebook the connection free — or refund that leg. Live tracking on all segments.</div></div>
+     <div class="totbar"><div><div class="tl">Total for 1 traveller</div></div><div class="tv">₹${o.price}</div></div>
+     <button class="btn" onclick="book()">Book all legs together</button>
+   </div>`;
+}
+function book(){
+ const o=OPTIONS[chosen];
+ document.getElementById('confcard').innerHTML=
+   o.steps.filter(s=>s[0]!=='lay').map(s=>`<div class="cl"><b>${s[2].split('—')[0].split('·')[0].trim()}</b><span class="ok">✓ Confirmed</span></div>`).join('')
+   +`<div class="cl" style="border-top:1px solid var(--line);margin-top:5px;padding-top:9px"><b>Total paid</b><b>₹${o.price}</b></div>`;
+ go('confirm');
+}
+
+function reset(){go('search');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+
+// init
+renderTrains();setBar('search');
+</script>
+</body>
+</html>
